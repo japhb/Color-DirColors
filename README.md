@@ -1,3 +1,52 @@
+### method new-from-env
+
+```raku
+method new-from-env() returns Color::DirColors:D
+```
+
+Autodetect dircolors rules from env vars, returning a rule applier object
+
+### method new-from-gnu
+
+```raku
+method new-from-gnu(
+    Str:D $gnu-rules
+) returns Color::DirColors:D
+```
+
+Parse dircolors rules from a GNU-formatted string, returning a rule applier object
+
+### method new-from-bsd
+
+```raku
+method new-from-bsd(
+    Str:D $bsd-rules
+) returns Color::DirColors:D
+```
+
+Parse dircolors rules from a BSD-formatted string, returning a rule applier object
+
+### method color-for
+
+```raku
+method color-for(
+    IO::Path:D(Any):D $path
+) returns Str:D
+```
+
+Apply parsed dircolors rules to an IO::Path object, returning a Terminal::ANSIColor color string (e.g. "bold red on_black")
+
+### method sgr-for
+
+```raku
+method sgr-for(
+    IO::Path:D(Any):D $path,
+    Bool:D :$bare = Bool::False
+) returns Str:D
+```
+
+Apply parsed dircolors rules to an IO::Path object, returning an ANSI SGR color string (e.g. "\e[1;31;40m"). If $bare is True, only include the SGR codes themselves, skipping the leading "\e[" and trailing "m".
+
 NAME
 ====
 

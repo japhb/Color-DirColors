@@ -6,6 +6,8 @@
   "build-depends": [
   ],
   "depends": [
+    "File::Stat",
+    "Terminal::ANSIColor"
   ],
   "description": "Parse and apply GNU and BSD ls coloring rules",
   "license": "Artistic-2.0",
