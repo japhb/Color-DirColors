@@ -88,22 +88,50 @@ method !best-color-rule(::?CLASS:D: IO::Path:D $path --> Str:D) {
         '', 'pipe', 'char', '', 'dir', '', 'block', '',
         '', '', 'symlink', '', 'socket', '', 'whiteout', '';
 
-    # First try rules based on mode (inode type info and permission bits)
-    my $stat  = stat($path);
-    my $mode  = $stat.mode;
-    my $mtype = ($mode +& 0o170000) +> 12;
-    my $type  = @mtypes[$mtype];
+    # First try rules based on mode (inode type info and permission bits);
+    # failure to stat a mode at all indicates an orphan.
+    my ($mtype, $type);
+    my $stat   = lstat($path);
+    my $mode   = $stat.mode;
+    if $mode.defined {
+        $mtype = ($mode +& 0o170000) +> 12;
+        $type  = @mtypes[$mtype];
+    }
+    else {
+        $mode  = 0;
+        $mtype = 0;
+        $type  = 'orphan';
+    }
 
     # Specialize 'dir' type if non-empty rules for sticky/o+w and mode matches
     if $type eq 'dir' {
-        my $ow = $mode +& 0o2;
+        my $ow = $mode +& 0o0002;
         my $st = $mode +& 0o1000;
         $type  = 'dir_sticky'     if        $st && %.type-rules{'dir_sticky'};
         $type  = 'dir_o+w'        if $ow        && %.type-rules{'dir_o+w'};
         $type  = 'dir_o+w_sticky' if $ow && $st && %.type-rules{'dir_o+w_sticky'};
     }
+    # Check for orphaned symlinks
+    elsif $type eq 'symlink' {
+        $type  = 'orphan' if !$path.readlink.e && %.type-rules<orphan>;
+    }
 
-    # XXXX: More special type checks
+    # Check for multiple hardlinks
+    unless %.type-rules{$type} {
+        $type = 'multi_hardlink' if $stat.nlink > 1 && %.type-rules<multi_hardlink>;
+    }
+
+    # Check for setuid/setgid, and whether they are on something executable
+    my $exe    = $mode +& 0o0111;
+    my $setuid = $mode +& 0o4000;
+    my $setgid = $mode +& 0o2000;
+
+    $type = 'setgid' if $setgid && %.type-rules<setgid>;
+    $type = 'setuid' if $setuid && %.type-rules<setuid>;
+    if $exe {
+        $type = 'exe_setgid' if $setgid && %.type-rules<exe_setgid>;
+        $type = 'exe_setuid' if $setuid && %.type-rules<exe_setuid>;
+    }
 
     # If we've got a non-empty mode/type rule, choose that one
     return %.type-rules{$type} if %.type-rules{$type};
