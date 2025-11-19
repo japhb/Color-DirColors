@@ -7,7 +7,7 @@
   ],
   "depends": [
   ],
-  "description": "blah blah blah",
+  "description": "Parse and apply GNU and BSD ls coloring rules",
   "license": "Artistic-2.0",
   "name": "Color::DirColors",
   "perl": "6.d",

@@ -1,7 +1,7 @@
 NAME
 ====
 
-Color::DirColors - blah blah blah
+Color::DirColors - Parse and apply GNU and BSD ls coloring rules
 
 SYNOPSIS
 ========
@@ -13,7 +13,9 @@ use Color::DirColors;
 DESCRIPTION
 ===========
 
-Color::DirColors is ...
+Color::DirColors is a helper for working with "dircolors", the rules that determine colors and attributes for colorized output of the standard `ls` shell command.
+
+Unfortunately the GNU and BSD implementations are wildly different, meaning that it is annoyingly finicky to correctly parse and apply these across even *nix variants. This module smoothes out these differences and allows you to determine correct ANSI SGR colors for any given IO::Path object.
 
 AUTHOR
 ======
