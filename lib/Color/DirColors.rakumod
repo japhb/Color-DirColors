@@ -165,11 +165,20 @@ method !color-from-bsd-pair(Str:D $pair where *.chars == 2 --> Str:D) {
 }
 
 # (PRIVATE) Convert GNU pseudo-SGR codes to a Terminal::ANSIColor color string
-method !color-from-gnu(Str:D $sgr --> Str:D) {
+method !color-from-gnu(Str:D $gnu --> Str:D) {
     # XXXX: Need to fill in conversions
     # XXXX: Sadly can't just use uncolor() because GNU codes aren't quite SGR
 
-    my $color = $sgr
+    my constant %color-map =
+        # XXXX: blink (05) and concealed (08) not supported by Terminal::ANSIColor
+        # XXXX: Codes > 47 not yet supported
+        '00' => '', '01' => 'bold', '04' => 'underscore', '07' => 'inverse',
+        30 => 'black', 31 => 'red', 32 => 'green', 33 => 'yellow',
+        34 => 'blue', 35 => 'magenta', 36 => 'cyan', 37 => 'white',
+        40 => 'on_black', 41 => 'on_red', 42 => 'on_green', 43 => 'on_yellow',
+        44 => 'on_blue', 45 => 'on_magenta', 46 => 'on_cyan', 47 => 'on_white';
+
+    $gnu.split(';').map({ %color-map{$_} }).grep(?*).join(' ')
 }
 
 
