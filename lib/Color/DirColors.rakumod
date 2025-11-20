@@ -1,5 +1,49 @@
 # ABSTRACT: Parse and apply GNU or BSD dircolors rules
 
+=begin pod
+
+=head1 NAME
+
+Color::DirColors - Parse and apply GNU and BSD ls coloring rules
+
+
+=head1 SYNOPSIS
+
+=begin code :lang<raku>
+
+use Color::DirColors;
+
+# Typical usage: Autodetect and use dircolors from environment variables
+my $dc    = Color::DirColors.new-from-env;
+my $path  = %*ENV<HOME>;
+my $color = $dc.color-for($path);      # Returns string of named colors
+my $sgr   = $dc.sgr-for($path);        # Returns full SGR escape sequence
+my $bare  = $dc.sgr-for($path, :bare); # Returns SGR codes only
+
+# Manual usage: Directly build rules from explicit BSD or GNU strings
+my $dc    = Color::DirColors.new-from-bsd('exfxcxdxbxegedabagacad');
+my $dc    = Color::DirColors.new-from-gnu('... very long string here ...');
+
+=end code
+
+
+=head1 DESCRIPTION
+
+Color::DirColors is a helper for working with "dircolors", the rules that
+determine colors and attributes for colorized output of the standard C<ls>
+shell command.
+
+Unfortunately the GNU and BSD implementations are wildly different, meaning
+that it is annoyingly finicky to correctly parse and apply these across even
+*nix variants.  This module smoothes out these differences and allows you to
+determine correct ANSI SGR colors for any given IO::Path object.
+
+
+=head2 Methods
+
+=end pod
+
+
 unit class Color::DirColors;
 
 use File::Stat < stat lstat >;
@@ -183,32 +227,6 @@ method !color-from-gnu(Str:D $gnu --> Str:D) {
 
 
 =begin pod
-
-=head1 NAME
-
-Color::DirColors - Parse and apply GNU and BSD ls coloring rules
-
-
-=head1 SYNOPSIS
-
-=begin code :lang<raku>
-
-use Color::DirColors;
-
-=end code
-
-
-=head1 DESCRIPTION
-
-Color::DirColors is a helper for working with "dircolors", the rules that
-determine colors and attributes for colorized output of the standard C<ls>
-shell command.
-
-Unfortunately the GNU and BSD implementations are wildly different, meaning
-that it is annoyingly finicky to correctly parse and apply these across even
-*nix variants.  This module smoothes out these differences and allows you to
-determine correct ANSI SGR colors for any given IO::Path object.
-
 
 =head1 AUTHOR
 

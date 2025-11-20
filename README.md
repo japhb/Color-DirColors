@@ -1,3 +1,36 @@
+NAME
+====
+
+Color::DirColors - Parse and apply GNU and BSD ls coloring rules
+
+SYNOPSIS
+========
+
+```raku
+use Color::DirColors;
+
+# Typical usage: Autodetect and use dircolors from environment variables
+my $dc    = Color::DirColors.new-from-env;
+my $path  = %*ENV<HOME>;
+my $color = $dc.color-for($path);      # Returns string of named colors
+my $sgr   = $dc.sgr-for($path);        # Returns full SGR escape sequence
+my $bare  = $dc.sgr-for($path, :bare); # Returns SGR codes only
+
+# Manual usage: Directly build rules from explicit BSD or GNU strings
+my $dc    = Color::DirColors.new-from-bsd('exfxcxdxbxegedabagacad');
+my $dc    = Color::DirColors.new-from-gnu('... very long string here ...');
+```
+
+DESCRIPTION
+===========
+
+Color::DirColors is a helper for working with "dircolors", the rules that determine colors and attributes for colorized output of the standard `ls` shell command.
+
+Unfortunately the GNU and BSD implementations are wildly different, meaning that it is annoyingly finicky to correctly parse and apply these across even *nix variants. This module smoothes out these differences and allows you to determine correct ANSI SGR colors for any given IO::Path object.
+
+Methods
+-------
+
 ### method new-from-env
 
 ```raku
@@ -46,25 +79,6 @@ method sgr-for(
 ```
 
 Apply parsed dircolors rules to an IO::Path object, returning an ANSI SGR color string (e.g. "\e[1;31;40m"). If $bare is True, only include the SGR codes themselves, skipping the leading "\e[" and trailing "m".
-
-NAME
-====
-
-Color::DirColors - Parse and apply GNU and BSD ls coloring rules
-
-SYNOPSIS
-========
-
-```raku
-use Color::DirColors;
-```
-
-DESCRIPTION
-===========
-
-Color::DirColors is a helper for working with "dircolors", the rules that determine colors and attributes for colorized output of the standard `ls` shell command.
-
-Unfortunately the GNU and BSD implementations are wildly different, meaning that it is annoyingly finicky to correctly parse and apply these across even *nix variants. This module smoothes out these differences and allows you to determine correct ANSI SGR colors for any given IO::Path object.
 
 AUTHOR
 ======
