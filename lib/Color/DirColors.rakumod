@@ -80,8 +80,8 @@ method new-from-gnu(Str:D $gnu-rules --> Color::DirColors:D) {
 
     # Split and categorize rules
     my @rules = $gnu-rules.split(':');
-    my @type  = @rules.grep(/^ [a..z][a..z] '=' /);
-    my @ext   = @rules.grep(/^ '*.' \w+     '=' /);
+    my @type  = @rules.grep(/^ <[a..z]><[a..z]> '=' /);
+    my @ext   = @rules.grep(/^ '*.' <-[?*.]>+ '=' /);
     my @glob  = keys @rules.grep(*.contains('*')) (-) @ext;
 
     # Convert rules to common format
@@ -181,7 +181,7 @@ method !best-color-rule(::?CLASS:D: IO::Path:D $path --> Str:D) {
     return %.type-rules{$type} if %.type-rules{$type};
 
     # Nothing special found in mode matches, try extension and return if found
-    my $ext      = $path.ext;
+    my $ext      = $path.extension;
     my $ext-rule = %.ext-rules{$ext};
     return %.ext-rules{$ext} if %.ext-rules{$ext};
 
