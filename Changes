@@ -1,6 +1,12 @@
 Revision history for Color::DirColors
 
 {{$NEXT}}
+  [Features]
+  - Support more GNU color codes via new Terminal::ANSIColor support
+
+  [Packaging]
+  - Bump Terminal::ANSIColor dependency to pick up new SGR codes
+
 
 0.0.1  2025-11-19T18:20:43-08:00
   - Initial version

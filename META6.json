@@ -7,7 +7,7 @@
   ],
   "depends": [
     "File::Stat",
-    "Terminal::ANSIColor"
+    "Terminal::ANSIColor:ver<0.14+>:auth<zef:raku-community-modules>"
   ],
   "description": "Parse and apply GNU and BSD ls coloring rules",
   "license": "Artistic-2.0",
