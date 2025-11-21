@@ -212,9 +212,10 @@ method !color-from-bsd-pair(Str:D $pair where *.chars == 2 --> Str:D) {
 method !color-from-gnu(Str:D $gnu --> Str:D) {
     # XXXX: Sadly can't just use uncolor() because GNU codes aren't quite SGR
     my constant %color-map =
-        # XXXX: blink (05) and concealed (08) not supported by Terminal::ANSIColor
-        # XXXX: Codes > 47 not yet supported
-        '00' => '', '01' => 'bold', '04' => 'underscore', '07' => 'inverse',
+        # XXXX: Codes > 47 (except 53) not yet supported
+        '00' => '', '01' => 'bold', '04' => 'underline',
+        '05' => 'blink', '07' => 'inverse', '08' => 'conceal',
+        21 => 'dunderline', 53 => 'overline',
         30 => 'black', 31 => 'red', 32 => 'green', 33 => 'yellow',
         34 => 'blue', 35 => 'magenta', 36 => 'cyan', 37 => 'white',
         40 => 'on_black', 41 => 'on_red', 42 => 'on_green', 43 => 'on_yellow',
