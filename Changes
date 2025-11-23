@@ -2,6 +2,12 @@ Revision history for Color::DirColors
 
 {{$NEXT}}
 
+0.0.3  2025-11-23T01:57:25-08:00
+  [Performance]
+  - Various tweaks to performance of !best-color-rule, which can add up for
+    very large directories (browser cache dirs, for instance)
+
+
 0.0.2  2025-11-21T09:40:17-08:00
   [Features]
   - Support more GNU color codes via new Terminal::ANSIColor support
