@@ -134,63 +134,52 @@ method !best-color-rule(::?CLASS:D: IO::Path:D $path --> Str:D) {
 
     # First try rules based on mode (inode type info and permission bits);
     # failure to stat a mode at all indicates an orphan.
-    my ($mtype, $type);
-    my $stat   = lstat($path);
-    my $mode   = $stat.mode;
+    my $type;
+    my $stat  = lstat($path);
+    my $mode  = $stat.mode;
     if $mode.defined {
-        $mtype = ($mode +& 0o170000) +> 12;
-        $type  = @mtypes[$mtype];
+        $type = @mtypes[($mode +& 0o170000) +> 12];
     }
     else {
-        $mode  = 0;
-        $mtype = 0;
-        $type  = 'orphan';
+        $mode = 0;
+        $type = 'orphan';
     }
 
     # Specialize 'dir' type if non-empty rules for sticky/o+w and mode matches
     if $type eq 'dir' {
         my $ow = $mode +& 0o0002;
         my $st = $mode +& 0o1000;
-        $type  = 'dir_sticky'     if        $st && %.type-rules{'dir_sticky'};
-        $type  = 'dir_o+w'        if $ow        && %.type-rules{'dir_o+w'};
-        $type  = 'dir_o+w_sticky' if $ow && $st && %.type-rules{'dir_o+w_sticky'};
+        $type  = 'dir_sticky'     if        $st && %!type-rules{'dir_sticky'};
+        $type  = 'dir_o+w'        if $ow        && %!type-rules{'dir_o+w'};
+        $type  = 'dir_o+w_sticky' if $ow && $st && %!type-rules{'dir_o+w_sticky'};
     }
     # Check for orphaned symlinks
     elsif $type eq 'symlink' {
-        $type  = 'orphan' if !$path.readlink.e && %.type-rules<orphan>;
+        $type  = 'orphan' if %!type-rules<orphan> && !$path.readlink.e;
     }
 
-    # Check for multiple hardlinks
-    unless %.type-rules{$type} {
-        $type = 'multi_hardlink' if $stat.nlink > 1 && %.type-rules<multi_hardlink>;
+    # Check for multiple hardlinks and executable bits
+    my $exe = $mode +& 0o0111;
+    unless %!type-rules{$type} {
+        $type = 'multi_hardlink' if %!type-rules<multi_hardlink> && $stat.nlink > 1;
+        $type = 'exe' if $exe && %!type-rules<exe>;
     }
 
     # Check for setuid/setgid, and whether they are on something executable
-    my $exe    = $mode +& 0o0111;
-    my $setuid = $mode +& 0o4000;
-    my $setgid = $mode +& 0o2000;
+    if $mode +& 0o6000 {
+        my $setgid = $mode +& 0o2000;
+        my $setuid = $mode +& 0o4000;
 
-    $type = 'setgid' if $setgid && %.type-rules<setgid>;
-    $type = 'setuid' if $setuid && %.type-rules<setuid>;
-    if $exe {
-        $type = 'exe_setgid' if $setgid && %.type-rules<exe_setgid>;
-        $type = 'exe_setuid' if $setuid && %.type-rules<exe_setuid>;
+        $type = 'setgid' if $setgid && %!type-rules<setgid>;
+        $type = 'setuid' if $setuid && %!type-rules<setuid>;
+        if $exe {
+            $type = 'exe_setgid' if $setgid && %!type-rules<exe_setgid>;
+            $type = 'exe_setuid' if $setuid && %!type-rules<exe_setuid>;
+        }
     }
 
-    # If we've got a non-empty mode/type rule, choose that one
-    return %.type-rules{$type} if %.type-rules{$type};
-
-    # Nothing special found in mode matches, try extension and return if found
-    my $ext      = $path.extension;
-    my $ext-rule = %.ext-rules{$ext};
-    return %.ext-rules{$ext} if %.ext-rules{$ext};
-
-    # Extension didn't match, try a general glob if any match
-    my $basename  = $path.basename;
-    my $glob-rule; # = %glob-rules.keys.first({ ... });  # XXXX: Glob match basename
-
-    # Glob or bust
-    $glob-rule // ''
+    # Ignores glob rules for now
+    %!type-rules{$type} || %!ext-rules{$path.extension} || '';
 }
 
 # (PRIVATE) Convert a BSD two-letter code to a Terminal::ANSIColor color string
